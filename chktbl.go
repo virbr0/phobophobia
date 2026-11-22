@@ -1,5 +1,6 @@
 // Code generated from qcommon/common.c (chktbl) of the Quake 2 GPL source. DEFINITELY EDIT ME.
 // THATS A LOT OF HEXADECIMALS BATMAN
+// We got some CRC foundation, so don't need to go full KERMIT the frog mode. Leaving this reading here for later -> https://www.mrob.com/pub/comp/crc-all.html
 package phobos
 
 // chktbl is mixed into the clc_move checksum (COM_BlockSequenceCRCByte).
