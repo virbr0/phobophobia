@@ -37,7 +37,7 @@ var morseToChar = map[string]byte{
 const (
 	morseMoveThreshold = 10.0                    // XY displacement per update to count as moving
 	morseDashMin       = 700 * time.Millisecond  // burst >= this is a dash; shorter is a dot
-	morseLetterGap     = 1200 * time.Millisecond // pause this long ends a letter
+	morseLetterGap     = 1199 * time.Millisecond // pause this long ends a letter
 	morseWordGap       = 2500 * time.Millisecond // pause this long ends a word
 	morseFlushGap      = 8 * time.Second         // flush whatever is pending after silence
 
