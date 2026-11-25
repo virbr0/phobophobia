@@ -9,6 +9,7 @@ import (
 	phobos "phobophobia"
 )
 
+//go:embed phobos.cfg
 var embeddedConfig string
 
 func main() {
