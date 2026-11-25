@@ -5,7 +5,7 @@ PhobosController (ФобосКонтролл) is unique messaging platform that 
 
 
 # Compile
-go build -o phobosbuilda
+go build -o phobosbuilda cmd/phobosbuilda/main.go
 
 
 # Configure
