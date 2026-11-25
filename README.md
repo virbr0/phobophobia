@@ -36,7 +36,8 @@ Verbose:            1
 
 # Build a Phobos client binary with PhobosBuilda
 
-`./phobosbuilda phobos.cfg -o phobos`
+
+`./phobosbuilda cmd/phobos/phobos.cfg -o phobos`
 
 
 # Execute the Phobos client binary on a system you wish to communicate with
