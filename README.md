@@ -1,7 +1,7 @@
 # phobophobia
 
-PhobosController (ФобосКонтролл) is unique messaging platform that uses multiple encoding schemes to support command-and-control communications with remote hosts over Quake 2's GPL netcode.
 
+PhobosController (ФобосКонтролл) is a unique messaging platform that uses multiple encoding schemes to support command-and-control communications with remote hosts over Quake 2's GPL netcode.
 
 
 # Compile
